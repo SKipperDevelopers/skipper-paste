@@ -1,6 +1,6 @@
 @skipper_paste_HostAddress = http://localhost:5051
 
-GET {{skipper_paste_HostAddress}}/get/test
+GET {{skipper_paste_HostAddress}}/get/WT6cD
 Accept: application/json
 
 ###
@@ -9,8 +9,10 @@ Accept: application/json
 
 POST {{skipper_paste_HostAddress}}/paste
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InBhc3RlIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6InBhc3RlLXVzZXIiLCJleHAiOjE3NTM2MDA4NDYsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcwODEiLCJhdWQiOiJwYXN0ZSJ9.2F50Z1gO6ERvznvGPFho7ieTj3lFkWKU0ZuIpMbwASM
+x-test: aaaa
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6InBhc3RlIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6InBhc3RlLXVzZXIiLCJleHAiOjE4MTY2NzY4NDIsImlzcyI6Imh0dHBzOi8vbG9jYWxob3N0OjcwODEiLCJhdWQiOiJwYXN0ZSJ9.0YqiOmDpnZuE3j8AWYswd8KslPq9H-8Rrg3YK2G040E
+
 {
-  "key": "aaaa",
-  "value": "bbbb"
+  "Content": "aaaa",
+  "Note": "bbbb"
 }

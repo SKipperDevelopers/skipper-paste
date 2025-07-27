@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.Tokens;
 using skipper_paste;
@@ -5,11 +6,17 @@ using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
+#if DEBUG
+builder.Logging.ClearProviders();
+builder.Logging.AddSimpleConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+#endif
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddCors();
+builder.Services.AddAuthentication();
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("PasteScope", policy =>
     {
@@ -42,7 +49,7 @@ if (args.Length == 1 && args[0] == "new-token")
         issuer: $"https://{domain}",
         audience: "paste",
         claims: claims,
-        expires: DateTime.UtcNow.AddHours(1),
+        expires: DateTime.UtcNow.AddYears(2),
         signingCredentials: creds
     );
 
@@ -54,8 +61,8 @@ if (args.Length == 1 && args[0] == "new-token")
 }
 
 //add jwt token validation with secret configured from startup
-builder.Services.AddAuthentication("Bearer")
-    .AddJwtBearer("Bearer", options =>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
         options.Authority = $"https://{domain}";
         options.Audience = "paste";
@@ -63,22 +70,27 @@ builder.Services.AddAuthentication("Bearer")
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = false,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            NameClaimType = System.Security.Claims.ClaimTypes.Name,
             ValidIssuer = $"https://{domain}",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret)),
-            LogValidationExceptions = true
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
         };
     });
 
 var app = builder.Build();
 
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
+app.Logger.LogInformation("Checking paste directory at {directory}", pasteDirectory);
 
 if (!Directory.Exists(pasteDirectory))
 {
+    app.Logger.LogInformation("Paste directory at {directory} doesn't exist!", pasteDirectory);
+
     Directory.CreateDirectory(pasteDirectory);
 }
 
@@ -92,13 +104,13 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthentication();
 
-app.MapPost("/paste", (PasteData data) =>
+app.MapPost("/paste", (PasteData data, HttpRequest request) =>
 {
     var pasteId = RandomNameGenerator.GenerateRandomName(5);
 
     File.WriteAllText(Path.Combine(pasteDirectory, pasteId + ".json"), JsonSerializer.Serialize(data));
 
-    return Results.Ok(new PasteLink(pasteId, $"{domain}/get/{pasteId}"));
+    return Results.Ok(new PasteLink(pasteId, $"{(request.IsHttps ? "https" : "http")}://{domain}/get/{pasteId}"));
 })
 .WithName("PasteJson")
 .RequireAuthorization();
@@ -118,6 +130,10 @@ app.MapGet("/get/{id}", (string id) =>
         return Results.NotFound("Paste not found");
     }
 });
+    //.RequireRateLimiting();
+
+app.Logger.LogInformation("Starting main http work...");
+
 
 app.Run();
 
