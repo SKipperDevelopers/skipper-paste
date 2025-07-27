@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>skipper_paste</RootNamespace>
+    <UserSecretsId>86a7693b-b613-460d-a020-89389376e2f1</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="build\**" />
+    <Compile Remove="output\**" />
+    <Content Remove="build\**" />
+    <Content Remove="output\**" />
+    <EmbeddedResource Remove="build\**" />
+    <EmbeddedResource Remove="output\**" />
+    <None Remove="build\**" />
+    <None Remove="output\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+  </ItemGroup>
+
+</Project>
