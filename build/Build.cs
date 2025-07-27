@@ -51,6 +51,9 @@ class Build : NukeBuild
     Target Restore => _ => _
         .Executes(() =>
         {
+            DotNetTasks.DotNetRestore(s => s
+                    .SetProjectFile("skipper-paste.csproj")
+                    .SetRuntime("linux-x64"));
         });
 
     Target Compile => _ => _
@@ -61,7 +64,11 @@ class Build : NukeBuild
             DotNetTasks.DotNetBuild(s => s
                 .SetProjectFile("skipper-paste.csproj")
                 .SetConfiguration(Configuration)
-                .SetOutputDirectory(OutputDirectory)
+                .SetPublishSingleFile(true)
+                .SetPublishTrimmed(true)
+                .SetSelfContained(true)
+                .SetRuntime("linux-x64")
+                .SetOutputDirectory(OutputDirectory / "linux-x64")
                 .EnableNoRestore());
         });
 
